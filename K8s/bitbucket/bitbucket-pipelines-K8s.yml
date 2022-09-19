@@ -1,0 +1,123 @@
+# This is an example Starter pipeline configuration
+# Use a skeleton to build, test and deploy using manual and parallel steps
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+
+image: atlassian/default-image:3
+options:
+  docker: true
+  size: 2x
+definitions:
+  services:
+    docker:
+      memory: 4096
+  steps:
+    - step: &sonar-scan
+        name: SonarQube analysis
+        script:
+          - pipe: sonarsource/sonarqube-scan:1.0.0
+            variables:
+              SONAR_HOST_URL: $SONAR_HOST_URL # Get the value from the repository/workspace variable.
+              SONAR_TOKEN: $SONAR_TOKEN # Get the value from the repository/workspace variable. You shouldn't set secret in clear text here.
+  caches:
+    sonar: ~/.sonar
+clone:
+  depth: full
+
+pipelines:
+  pull-requests:
+    '**':
+      - step: *sonar-scan
+  branches:
+    develop:
+      - step:
+          name: Run test & docker build
+          deployment: Test
+          script:
+            # add test script here ...
+            - docker build --file Dockerfile --tag $IMAGE_NAME --build-arg ENV_BUILD=dev .
+            - docker save $IMAGE_NAME --output "docker.tar"
+          services:
+            - docker
+          caches:
+            - docker
+          artifacts:
+            - '*.tar'
+      - step:
+          name: Deploy to K8s
+          deployment: Development
+          script:
+            - export VERSION="dev-0.1.${BITBUCKET_BUILD_NUMBER}"
+            # Install Tools
+            - sh ./deployment/install.sh
+            # Push Image to ECR
+            - export IMAGE_REPO=$IMAGE_REPO_DEV
+            - docker load --input "docker.tar"
+            - docker tag $IMAGE_NAME $IMAGE_REPO_DEV:${VERSION}
+            - docker push $IMAGE_REPO_DEV:${VERSION}
+            # Deploy to EKS
+            - export KUBE_NAMESPACE=$KUBE_CONFIG_NAMESPACE_DEV
+            - sh ./deployment/deploy.sh
+          services:
+            - docker
+    staging:
+      - step:
+          name: Run test & docker build
+          deployment: Test
+          script:
+            # add test script here ...
+            - docker build --file Dockerfile --tag $IMAGE_NAME --build-arg ENV_BUILD=test .
+            - docker save $IMAGE_NAME --output "docker.tar"
+          services:
+            - docker
+          caches:
+            - docker
+          artifacts:
+            - '*.tar'
+      - step:
+          name: Deploy to K8s
+          deployment: Staging
+          script:
+            - export VERSION="stg-0.1.${BITBUCKET_BUILD_NUMBER}"
+            # Install Tools
+            - sh ./deployment/install.sh
+            # Push Image to ECR
+            - export IMAGE_REPO=$IMAGE_REPO_STAGING
+            - docker load --input "docker.tar"
+            - docker tag $IMAGE_NAME $IMAGE_REPO_STAGING:${VERSION}
+            - docker push $IMAGE_REPO_STAGING:${VERSION}
+            # Deploy to EKS
+            - export KUBE_NAMESPACE=$KUBE_CONFIG_NAMESPACE_STAGING
+            - sh ./deployment/deploy.sh
+    release:
+      - step:
+          name: Run test & docker build
+          deployment: Test
+          script:
+            # add test script here ...
+            - docker build --file Dockerfile --tag $IMAGE_NAME --build-arg ENV_BUILD=pre .
+            - docker save $IMAGE_NAME --output "docker.tar"
+          services:
+            - docker
+          caches:
+            - docker
+          artifacts:
+            - '*.tar'
+      - step:
+          name: Deploy to K8s
+          deployment: Production
+          script:
+            - export VERSION="stg-0.1.${BITBUCKET_BUILD_NUMBER}"
+            # Install Tools
+            - sh ./deployment/install.sh
+            # Push Image to ECR
+            - export IMAGE_REPO=$IMAGE_REPO_PROD
+            - docker load --input "docker.tar"
+            - docker tag $IMAGE_NAME $IMAGE_REPO_PROD:${VERSION}
+            - docker push $IMAGE_REPO_PROD:${VERSION}
+            # Deploy to EKS
+            - export KUBE_NAMESPACE=$KUBE_CONFIG_NAMESPACE_PROD
+            - sh ./deployment/deploy-prod.sh
+          services:
+            - docker
+

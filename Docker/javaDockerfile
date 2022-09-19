@@ -1,0 +1,14 @@
+FROM timbru31/java-node:11-alpine-jdk-fermium as build
+RUN apk add bash
+RUN mkdir /app
+ADD . /app
+WORKDIR /app
+RUN ./mvnw dependency:go-offline
+RUN ./mvnw -Pprod clean verify -Dmaven.test.skip=true
+
+FROM timbru31/java-node:11-alpine-jdk-fermium
+RUN mkdir /app
+ADD . /app
+WORKDIR /app
+COPY --from=build /app/target/*.jar /app/app.jar
+ENTRYPOINT ["java","-jar","/app/app.jar"]

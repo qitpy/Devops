@@ -1,0 +1,33 @@
+# This is an example Starter pipeline configuration
+# Use a skeleton to build, test and deploy using manual and parallel steps
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+
+image: node:14.16.0
+options:
+  docker: true
+  size: 2x
+definitions:
+  services:
+    docker:
+      memory: 4096
+pipelines:
+  branches:
+    develop:
+      - step:
+          name: Build and Test
+          caches:
+            - node
+          script: # Modify the commands below to build your repository.
+            - npm install
+            - npm run build
+    staging:
+      - step:
+          name: Deploy to server
+          # trigger: manual # Uncomment to make this a manual deployment.
+          script:
+            - pipe: atlassian/ssh-run:0.4.1
+              variables:
+                SSH_USER: 'root'
+                SERVER: '65.108.87.79'
+                COMMAND: 'sh deploy_cardoen_widget.sh'
