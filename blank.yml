@@ -1,0 +1,57 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main", "develop", "feature/setup-cicd" ]
+  pull_request:
+    branches: [ "main", "develop", "feature/setup-cicd" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+env:
+  HELM_DEPLOY_NAME: smartdev-handbook
+  IMAGE_REPO: 269715254496.dkr.ecr.ap-southeast-1.amazonaws.com/smartdev-handbook
+  IMAGE_HOST: 269715254496.dkr.ecr.ap-southeast-1.amazonaws.com
+  IMAGE_NAME: smartdev-handbook
+  AWS_DEFAULT_REGION: ap-southeast-1
+  AWS_SECRET_ACCESS_KEY: 7PiArrdG8ia9BUw7o+lvCz81DD9OxRBlfg4gpO/w
+  AWS_ACCESS_KEY_ID: AKIAT5TCIFTQGIUBCHJR
+  KUBE_CONFIG_NAMESPACE: smartdev-handbook
+  KUBE_CONFIG_CERTIFICATE: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMvakNDQWVhZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJeU1EWXlOakV5TURRME1sb1hEVE15TURZeU16RXlNRFEwTWxvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTXQ0CmNkSmJON3J0SDMzQUhLaXkwcUZmUXhYc0dWSmlUVTVPNk1qbUpURU9IM2VDU0NLM0tiT0QzVytwZVZBaU44dlUKZ0pVZ3RnYmliNUdTRTFOKzR0RGdKZjkrTi9uU1hJcm4yOW5iU0FEN0YxRUF6cXJCckpUa0dYSEZKTVdaUFA2cwpPNHpQVkQ4RTlBOERJRmdiOGpEUm9wNk1pZ2cxNjVHRVJqc3pNaFlvQk8xRkt5L2REaDRiT2FhejRIR0xYQ1l0Cnp5L3FFRlhrQ1J2cEUyYXRPRXN4UFdaZ0hWNlNNL2VTT09xT0VMd1orMWVLUy9pajBrZmgxMlA5Y0thWjg3R3IKSW5RN1BiWUpwWlNPMUhKZzd0V1VQaSs0THBaZWkwSGJ5K01Id1d5cUsybnJNV2tLWktRZERoby9MRVY2ZG5wZwptMWVzME1paFNpd29WTkxsVUprQ0F3RUFBYU5aTUZjd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0hRWURWUjBPQkJZRUZDNEh5aTVZYXJwMis3OVBCZTVXMlkyb0pMMHhNQlVHQTFVZEVRUU8KTUF5Q0NtdDFZbVZ5Ym1WMFpYTXdEUVlKS29aSWh2Y05BUUVMQlFBRGdnRUJBSE1qMmZmWktUQ0R1aVRFQ0h3QQpLVkc3Y0ZLeVFjRVY4MXNOdmJkbHhiaEk5L3NKN0NBdy95dzdqeENIdnQySnBycWN6KzdxVW5MRWxsRzJwVlV2ClV1STc5emV6emFxa0dsZHNIOEd3emo0TkN1TFd2Z2ZjQjVJUVJ5Z1dweUhQOE9VVVVzVEhuY2t4TnozME1hYzEKWDIvRkpmVGdPOWcxeEpqYit4Q3FzR1RvZE9pVHdqRkl2Ny9LYWlaR3dKVzVCNDFtMnEvc29DY3B1YWJhOHVuYwp0VzVMdk1Qdk5qejNRdDdXYkNpd1lSNVJSV0V1WXkwUysvSjVNRjVVMDY3M3NONEg1THNKR1cyRm84ZCtBWktXClJFWkZ1WCsyTFMxaWRCV1JmV2w5SGlsSTFCNTZUbkxEQ2V1dFJBd0VrWmJZNWpER0pEemlxalljV3NBY0ZTU2EKcUFFPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  KUBE_CONFIG_TOKEN: eyJhbGciOiJSUzI1NiIsImtpZCI6IjRvcTZTc28xN0trNkZNVi1oXzdReS0zRkYyTnI2VHBiVEQ4RUViXzRzV0kifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJwZXJtaXNzaW9uLW1hbmFnZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoicXV5ZXQtZG9hbi10b2tlbi04a2pieCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJxdXlldC1kb2FuIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiNmE4ZTQxYzEtMzY1YS00MTBiLWI4MDctOGY4OTdkNDgyZDhhIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OnBlcm1pc3Npb24tbWFuYWdlcjpxdXlldC1kb2FuIn0.pnnQz8_no3OuRdBL1kcNnxGmVYnB2S5fNxFqMwoXwPZcti7l6c_BXDVjwbPR-y5NLzhoyueRfscSNp2UdrZPppKMm4VU-KLQnrZ7g7HnWhw5TgEHHsDGmgbonqLBCfFm54l01iRVSI4Zf3Vzt3cfwZxuRHrK7VgHFX80pCpRLiryAkom83t_AT2_5i_pVE__lPC6COqDhV8CjO47HdG7r8_El3ZjrCOc3E3igtc0FYsbsqGE5BD87KiTPSERHGuRfTeoXMMzZma3uTUmKmebW9w92oWlHn_Db6ui-E9d9PRJ_wka7IjGaN_2JzIEXKlb9qiGocK6VjIP2uOtCEyEEA
+  
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Runs a single command using the runners shell
+      - name: push ECR
+        run: |
+          docker build --file Dockerfile --tag smartdev-handbook .
+          export VERSION=$GITHUB_RUN_NUMBER
+          sh ./deployment/install.sh
+          docker tag $IMAGE_NAME $IMAGE_REPO:${VERSION}
+          docker push $IMAGE_REPO:${VERSION}
+
+      # Runs a set of commands using the runners shell
+      - name: install in K8s
+        run: |
+          export KUBE_NAMESPACE=$KUBE_CONFIG_NAMESPACE
+          export KUBE_TOKEN=$KUBE_CONFIG_TOKEN
+          export KUBE_CERTIFICATE=$KUBE_CONFIG_CERTIFICATE
+          export HELM_PACKAGE=./deployment/helm/$HELM_DEPLOY_NAME
+          envsubst < ./deployment/kubeconfig > ~/.kube/config
+          helm upgrade --install --set image.tag=${VERSION} $HELM_DEPLOY_NAME ${HELM_PACKAGE}
