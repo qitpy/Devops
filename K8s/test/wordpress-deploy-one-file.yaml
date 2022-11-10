@@ -1,8 +1,8 @@
 #1 change $NAME_SPACE to your name you want
 #2 change $YOUR_DOMAIN to your domain you want
-#3 kubectl apply -f wordpress-deploy-one-file.yaml
+#3 run: kubectl apply -f wordpress-deploy-one-file.yaml
 #4 wait for 5-10min
-#5 check your public domain that is working! $YOUR_DOMAIN.smartdev.dev
+#5 check your public domain and make sure that is running successfully! --> https://$YOUR_DOMAIN.dev.smartdev.dev
 #6 when finish and you don't need to use this test anymore, we have to remove this test cause of the save the money: kubectl delete -f wordpress-deploy-one-file.yaml
 
 apiVersion: v1
