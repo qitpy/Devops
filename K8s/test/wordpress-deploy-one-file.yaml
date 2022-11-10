@@ -1,4 +1,9 @@
-## change $NAME_SPACE to your name you want
+#1 change $NAME_SPACE to your name you want
+#2 change $YOUR_DOMAIN to your domain you want
+#3 kubectl apply -f wordpress-deploy-one-file.yaml
+#4 wait for 5-10min
+#5 check your public domain that is working! $YOUR_DOMAIN.smartdev.dev
+#6 when finish and you don't need to use this test anymore, we have to remove this test cause of the save the money: kubectl delete -f wordpress-deploy-one-file.yaml
 
 apiVersion: v1
 kind: Namespace
@@ -146,9 +151,9 @@ metadata:
   namespace: $NAME_SPACE
 spec:
   secretName: test-velero-tls
-  commonName: test-velero.dev.smartdev.dev
+  commonName: $YOUR_DOMAIN.dev.smartdev.dev
   dnsNames:
-  - test-velero.dev.smartdev.dev
+  - $YOUR_DOMAIN.dev.smartdev.dev
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
@@ -162,7 +167,7 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
-  - host: test-velero.dev.smartdev.dev
+  - host: $YOUR_DOMAIN.dev.smartdev.dev
     http:
       paths:
       - pathType: Prefix
@@ -174,5 +179,5 @@ spec:
               number: 80
   tls:
   - hosts:
-    - test-velero.dev.smartdev.dev
+    - $YOUR_DOMAIN.dev.smartdev.dev
     secretName: test-velero-tls
